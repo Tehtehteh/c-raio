@@ -86,20 +86,16 @@ void Application::loop() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    Texture texture1("assets/textures/wall.jpg");
-    Texture texture2("assets/textures/awesomeface.png");
-    texture2.bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    std::string wall_fn = "assets/textures/wall.jpg";
+    std::string af_fn = "assets/textures/awesomeface.png";
+    Texture texture1(wall_fn, TextureColorModel::RGB);
+    Texture texture2(af_fn, TextureColorModel::RGBA);
 
     p.use();
-    glUniform1i(glGetUniformLocation(p.id, "Texture"), 0); // set it manually
-    glUniform1i(glGetUniformLocation(p.id, "Texture2"), 1); // set it manually
-
+    int loc = p.get_uniform_location("Texture");
+    glUniform1i(loc, 0);
+    loc = p.get_uniform_location("Texture2");
+    glUniform1i(loc, 1);
 
     while (!glfwWindowShouldClose(this->window)) {
         glClear(GL_COLOR_BUFFER_BIT);

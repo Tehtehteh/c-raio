@@ -6,23 +6,11 @@ Texture::~Texture() {
     glDeleteTextures(1, buf);
 }
 
-Texture::Texture(std::string &file_name) {
-    if (file_utils::exists(file_name)) {
-        this->id = 0;
-        return;
-    }
-    this->id = SOIL_load_OGL_texture(file_name.c_str(),
-            SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-            SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-    );
-    if (this->id == 0) {
-        std::cout << "Failed to load image into OGL texture. Error: " << SOIL_last_result() << std::endl;
-    }
+Texture::Texture(std::string &file_name, const TextureColorModel cm): Texture(file_name.c_str(), cm) {
 }
 
 
-
-Texture::Texture(char *file_name) {
+Texture::Texture(const char *file_name, const TextureColorModel cm) : color_model(cm) {
     std::string f_name = file_name;
     if (!file_utils::exists(f_name)) {
         this->id = 0;
@@ -37,20 +25,16 @@ Texture::Texture(char *file_name) {
     if (data == nullptr) {
         return;
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    if (channels == 4 && this->color_model != TextureColorModel::RGBA) {
+        std::cout << "Warning: trying to load image into texture in RGB format, while image is RGBA " << std::endl;
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_RGB, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     this->id = texture_id;
     SOIL_free_image_data(data);
-//    this->id = SOIL_load_OGL_texture(file_name,
-//            SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-//            SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-//    );
-//    if (this->id == 0) {
-//        std::cout << "Failed to load image into OGL texture. Error: " << SOIL_last_result() << std::endl;
-//    }
 }
 
-void Texture::load_new_image(std::string &file_name) {
+void Texture::load_new_image(std::string &file_name, const TextureColorModel cm) {
     if (!file_utils::exists(file_name)) {
         return;
     }
@@ -62,17 +46,9 @@ void Texture::load_new_image(std::string &file_name) {
     if (data == nullptr) {
         return;
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, cm, widht, height, 0, cm, GL_UNSIGNED_BYTE, data);
     this->id = texture_id;
     SOIL_free_image_data(data);
-//    this->id = SOIL_load_OGL_texture(file_name.c_str(),
-//            SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-//            SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-//    );
-//    if (this->id == 0) {
-//        std::cout << "Failed to load image into OGL texture. Error: " << SOIL_last_result() << std::endl;
-//    }
-
 }
 
 void Texture::bind() {
