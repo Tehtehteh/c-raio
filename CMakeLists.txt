@@ -24,6 +24,12 @@ include_directories(${GLEW_INCLUDE_DIRS})
 # SOIL
 find_library(SOIL soil HINTS ${LIB_DIR}/lib/SOIL)
 
+# imgui
+#include_directories(${PROJECT_SOURCE_DIR})
+add_subdirectory(${LIB_DIR}/imgui)
+target_link_libraries(${PROJECT_NAME} imgui)
+include_directories(${LIB_DIR}/imgui)
+
 if (APPLE)
     find_library(COCOA_LIBRARY Cocoa)
     find_library(OpenGL_LIBRARY OpenGL)
@@ -37,6 +43,7 @@ target_link_libraries(
         ${PROJECT_NAME}
         glfw
         ${SOIL}
+        ${imgui}
         ${OPENGL_LIBRARIES}
         ${GLEW_LIBRARIES}
         ${EXTRA_LIBS}

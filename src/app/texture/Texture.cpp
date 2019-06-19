@@ -47,7 +47,9 @@ void Texture::load_new_image(std::string &file_name, const TextureColorModel cm)
         return;
     }
     glTexImage2D(GL_TEXTURE_2D, 0, cm, widht, height, 0, cm, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
     this->id = texture_id;
+    this->color_model = cm;
     SOIL_free_image_data(data);
 }
 
