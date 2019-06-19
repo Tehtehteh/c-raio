@@ -92,10 +92,8 @@ void Application::loop() {
     Texture texture2(af_fn, TextureColorModel::RGBA);
 
     p.use();
-    int loc = p.get_uniform_location("Texture");
-    glUniform1i(loc, 0);
-    loc = p.get_uniform_location("Texture2");
-    glUniform1i(loc, 1);
+    glUniform1i(p.get_uniform_location("Texture"), 0);
+    glUniform1i(p.get_uniform_location("Texture2"), 1);
 
     while (!glfwWindowShouldClose(this->window)) {
         glClear(GL_COLOR_BUFFER_BIT);

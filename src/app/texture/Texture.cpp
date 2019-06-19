@@ -28,7 +28,7 @@ Texture::Texture(const char *file_name, const TextureColorModel cm) : color_mode
     if (channels == 4 && this->color_model != TextureColorModel::RGBA) {
         std::cout << "Warning: trying to load image into texture in RGB format, while image is RGBA " << std::endl;
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_RGB, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, this->color_model, widht, height, 0, this->color_model, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     this->id = texture_id;
     SOIL_free_image_data(data);
