@@ -7,17 +7,38 @@ Texture::~Texture() {
 }
 
 Texture::Texture(std::string &file_name) {
-    if (file_utils::exists(file_name)) {
+    if (!file_utils::exists(file_name)) {
         this->id = 0;
         return;
     }
-    this->id = SOIL_load_OGL_texture(file_name.c_str(),
-            SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-            SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-    );
-    if (this->id == 0) {
-        std::cout << "Failed to load image into OGL texture. Error: " << SOIL_last_result() << std::endl;
+    int widht, height, channels;
+    GLuint texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    unsigned char* data = SOIL_load_image(file_name.c_str(), &widht, &height, &channels, 0);
+    if (data == nullptr) {
+        return;
     }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    this->id = texture_id;
+    SOIL_free_image_data(data);
+//    if (!file_utils::exists(file_name)) {
+//        this->id = 0;
+//        return;
+//    }
+//    this->id = SOIL_load_OGL_texture(file_name.c_str(),
+//            SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+//            SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+//    );
+//    if (this->id == 0) {
+//        std::cout << "Failed to load image into OGL texture. Error: " << SOIL_last_result() << std::endl;
+//    }
 }
 
 
@@ -38,6 +59,10 @@ Texture::Texture(char *file_name) {
         return;
     }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glGenerateMipmap(GL_TEXTURE_2D);
     this->id = texture_id;
     SOIL_free_image_data(data);

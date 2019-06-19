@@ -12,6 +12,6 @@ uniform float H_Offset;
 void main() {
     VertexColor = in_Color;
     TexPos = in_TexPos;
-    Position = vec4(in_Pos.x, in_Pos.y + H_Offset, in_Pos.z, 1.0f);
+    Position = vec4(in_Pos.x, in_Pos.y, in_Pos.z, 1.0f);
     gl_Position = Position;
 }

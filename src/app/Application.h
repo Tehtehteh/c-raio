@@ -12,7 +12,7 @@
 
 class Application {
 public:
-    Application(int &height, int &width, std::string name);
+    Application(int &height, int &width, std::string name, unsigned int);
     ~Application();
     void loop();
 protected:
@@ -22,6 +22,7 @@ protected:
     std::string name;
     bool running;
     bool initialized;
+    unsigned int frame_limit;
 };
 
 

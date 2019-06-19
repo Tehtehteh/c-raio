@@ -1,8 +1,9 @@
 #include "Application.h"
 
+void processInput(GLFWwindow*);
 
-Application::Application(int &height, int &width, std::string name)
-    : name(std::move(name)), height(height), width(width)
+Application::Application(int &height, int &width, std::string name, unsigned int frame_limit)
+    : name(std::move(name)), height(height), width(width), frame_limit(frame_limit)
 {
     this->running = false;
     this->initialized = false;
@@ -53,15 +54,31 @@ void Application::loop() {
     Shader fshader(fpath, ShaderType::FRAGMENT);
     ShaderProgram p (std::vector<Shader>{vshader, fshader});
     float vertices[] = {
+//            // positions          // colors           // texture coords
+//            0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f, // top right
+//            0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+//            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+//            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
             // positions          // colors           // texture coords
-            0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-            0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+            -1.0f, -1.0f, 0,  1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // top right
+            -0.3f, -0.3f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0, -1.0f, // bottom right
+            0, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   -2.0f, 0.0f, // bottom right
+            0.3f, -0.3f, 0.0f,   0.0f, 0.0f, 1.0f,   -2.0f, 4.0f, // bottom left
+            1.0f,  -1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.5f, 0.5f,  // top left
+
+            // WALL
+            -0.3f, -0.3f, 0.0f,   0.0f, 1.0f, 0.0f,   0, 0, // bottom right
+            -0.3f,  0.3f, 0.0f,   1.0f, 1.0f, 0.0f,   0, 1.0f,  // top left
+            0.3f,  0.3f, 0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 1.0f,  // top left
+            0.3f, -0.3f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0, // bottom left
+//            1.0f,  -1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
     };
     unsigned int indices[] = {
-            0, 1, 3, // first triangle
-            1, 2, 3  // second triangle
+            0, 1, 2, // first triangle
+            2, 1, 3,
+            3, 2, 4,
+            5, 6, 7,
+            5, 7, 8,
     };
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -86,32 +103,42 @@ void Application::loop() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    Texture texture1("assets/textures/wall.jpg");
-    Texture texture2("assets/textures/awesomeface.png");
-    texture2.bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+    std::string wall_texture_fn = "assets/textures/wall.jpg";
+    std::string af_texture_fn = "assets/textures/awesomeface.png";
+    Texture texture1(wall_texture_fn);
     p.use();
-    glUniform1i(glGetUniformLocation(p.id, "Texture"), 0); // set it manually
-    glUniform1i(glGetUniformLocation(p.id, "Texture2"), 1); // set it manually
+//    glUniform1i(glGetUniformLocation(p.id, "Texture"), 0); // set it manually
+//    glUniform1i(glGetUniformLocation(p.id, "Texture2"), 1); // set it manually
+
+    double delta = 0.0f;
+    double last_time = glfwGetTime();
 
 
     while (!glfwWindowShouldClose(this->window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
-        glActiveTexture(GL_TEXTURE0);
-        texture1.bind();
-        glActiveTexture(GL_TEXTURE1);
-        texture2.bind();
-        p.use();
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        delta = delta + (glfwGetTime() - last_time) * this->frame_limit;
+        while (delta >= 1.0f) {
+            glClear(GL_COLOR_BUFFER_BIT);
+            glActiveTexture(GL_TEXTURE0);
+            processInput(this->window);
+            texture1.bind();
+//            glActiveTexture(GL_TEXTURE1);
+//            texture2.bind();
+            p.use();
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+            --delta;
+        }
     }
     this->running = false;
+}
+
+void processInput(GLFWwindow *w) {
+    if (glfwGetKey(w, GLFW_KEY_1)) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    if (glfwGetKey(w, GLFW_KEY_2)) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 }
