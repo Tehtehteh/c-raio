@@ -121,6 +121,8 @@ void Application::loop() {
     glUniform1f(p.get_uniform_location("u_mix"), mix);
     glfwSetKeyCallback(this->window, key_callback);
 
+    Vector2D v1((GLfloat)1, (GLfloat)2);
+    Vector2D v2((GLfloat)1, (GLfloat)2);
     while (!glfwWindowShouldClose(this->window)) {
         ImGui_ImplGlfwGL3_NewFrame();
         {

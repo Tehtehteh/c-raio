@@ -7,8 +7,10 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
+#include <glm/glm.hpp>
 
 #include "./shader/Shader.h"
+#include "../utils/Vector2D.h"
 #include "./shader/ShaderProgram.h"
 #include "./texture/Texture.h"
 

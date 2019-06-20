@@ -6,7 +6,7 @@ set(LIB_DIR lib)
 
 set(CMAKE_CXX_STANDARD 14)
 file(GLOB_RECURSE SRC_FILES src/utils/*.cpp src/utils/*.h src/*.cpp src/*.h src/*.hpp src/app/*.cpp src/app/*.h)
-add_executable(${PROJECT_NAME} src/main.cpp ${SRC_FILES} src/app/texture/Texture.cpp src/app/texture/Texture.h)
+add_executable(${PROJECT_NAME} src/main.cpp ${SRC_FILES} src/app/texture/Texture.cpp src/app/texture/Texture.h src/utils/Vector2D.cpp src/utils/Vector2D.h)
 
 # glfw
 find_package(glfw3 REQUIRED)
@@ -23,6 +23,11 @@ include_directories(${GLEW_INCLUDE_DIRS})
 
 # SOIL
 find_library(SOIL soil HINTS ${LIB_DIR}/lib/SOIL)
+
+# GLM
+add_subdirectory(${LIB_DIR}/glm)
+target_link_libraries(${PROJECT_NAME} glm)
+include_directories(${LIB_DIR}/glm/glm)
 
 # imgui
 #include_directories(${PROJECT_SOURCE_DIR})
