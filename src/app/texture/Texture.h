@@ -8,15 +8,23 @@
 #include <string>
 #include "../../utils/file.h"
 
+enum TextureColorModel {
+    RGBA = GL_RGBA,
+    RGB = GL_RGB,
+    BGR = GL_BGR
+};
+
 class Texture {
 public:
-    explicit Texture(std::string& file_name);
-    explicit Texture(char* file_name);
-    void load_new_image(std::string& file_name);
+    explicit Texture(std::string& file_name, TextureColorModel);
+    explicit Texture(const char* file_name, TextureColorModel);
+    void load_new_image(std::string& file_name, TextureColorModel);
     void bind();
     ~Texture();
-    GLuint id;
 
+
+    GLuint id;
+    TextureColorModel color_model;
 };
 
 

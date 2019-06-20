@@ -4,3 +4,7 @@ lib/SOIL/lib/
 lib/SOIL/obj/
 *.o
 *.a
+build
+
+.vscode/*
+!.vscode/launch.json
